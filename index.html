@@ -1,0 +1,1036 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Data Akun</title>
+<meta name="description" content="Simpan data akun kamu dengan aman: username, kontak, password, dan foto." />
+
+<link rel="manifest" href="/manifest.json" />
+<meta name="theme-color" content="#09090b" />
+<meta name="background-color" content="#09090b" />
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png" />
+<link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16.png" />
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Data Akun" />
+<meta name="msapplication-TileColor" content="#4f46e5" />
+<meta name="msapplication-TileImage" content="/icons/icon-192.png" />
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+  html, body, #root { height: 100%; }
+  body { background:#09090b; overscroll-behavior-y: none; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  ::-webkit-scrollbar { display: none; }
+  .line-clamp-3 { display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+  .fade-in { animation: fadeIn .18s ease both; }
+  .fade-out { animation: fadeOut .18s ease both; }
+  .pop-in { animation: popIn .22s cubic-bezier(.2,.9,.3,1.2) both; }
+  .pop-out { animation: popOut .16s ease both; }
+  .sheet-in { animation: sheetIn .28s cubic-bezier(.16,1,.3,1) both; }
+  .sheet-out { animation: sheetOut .18s ease both; }
+  .toast-in { animation: toastIn .25s cubic-bezier(.2,.9,.3,1.2) both; }
+  .toast-out { animation: toastOut .18s ease both; }
+  .card-in { animation: cardIn .28s cubic-bezier(.2,.9,.3,1.2) both; }
+  .card-out { animation: cardOut .16s ease both; }
+  .banner-in { animation: bannerIn .3s cubic-bezier(.16,1,.3,1) both; }
+  @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+  @keyframes fadeOut { from{opacity:1} to{opacity:0} }
+  @keyframes popIn { from{opacity:0; transform:scale(.92)} to{opacity:1; transform:scale(1)} }
+  @keyframes popOut { from{opacity:1; transform:scale(1)} to{opacity:0; transform:scale(.92)} }
+  @keyframes sheetIn { from{transform:translateY(100%)} to{transform:translateY(0)} }
+  @keyframes sheetOut { from{transform:translateY(0)} to{transform:translateY(100%)} }
+  @keyframes toastIn { from{opacity:0; transform:translate(-50%,16px) scale(.9)} to{opacity:1; transform:translate(-50%,0) scale(1)} }
+  @keyframes toastOut { from{opacity:1; transform:translate(-50%,0) scale(1)} to{opacity:0; transform:translate(-50%,16px) scale(.9)} }
+  @keyframes cardIn { from{opacity:0; transform:scale(.92) translateY(8px)} to{opacity:1; transform:scale(1) translateY(0)} }
+  @keyframes cardOut { from{opacity:1; transform:scale(1)} to{opacity:0; transform:scale(.9)} }
+  @keyframes bannerIn { from{opacity:0; max-height:0} to{opacity:1; max-height:200px} }
+  .chip { transition: transform .22s cubic-bezier(.2,.8,.3,1), opacity .18s ease, border-color .15s ease, background-color .15s ease, color .15s ease; }
+  .chip:active { transform: scale(.94); }
+  .press:active { transform: scale(.9); }
+  .press-sm:active { transform: scale(.85); }
+  button { transition: transform .12s ease, background-color .15s ease, border-color .15s ease, color .15s ease, opacity .15s ease; }
+
+  /* ===== Tema terang: override halus di atas palet zinc gelap yang jadi basis desain ===== */
+  html.light body { background-color: #f6f6f8; }
+  html.light .bg-zinc-950 { background-color: #f6f6f8 !important; }
+  html.light .bg-zinc-900 { background-color: #ffffff !important; }
+  html.light .bg-zinc-800 { background-color: #f1f1f5 !important; }
+  html.light .bg-zinc-600 { background-color: #d4d4dc !important; }
+  html.light .border-zinc-800 { border-color: #e7e7ec !important; }
+  html.light .border-zinc-700 { border-color: #dcdce3 !important; }
+  html.light .text-zinc-50 { color: #18181b !important; }
+  html.light .text-zinc-100 { color: #18181b !important; }
+  html.light .text-zinc-300 { color: #3f3f46 !important; }
+  html.light .text-zinc-400 { color: #52525b !important; }
+  html.light .text-zinc-500 { color: #6b6b76 !important; }
+  html.light .text-zinc-600 { color: #9d9da6 !important; }
+  html.light input::placeholder,
+  html.light textarea::placeholder { color: #a8a8b2 !important; }
+  html.light .shadow-xl, html.light .shadow-lg, html.light .shadow-2xl { box-shadow: 0 8px 24px rgba(24,24,27,0.10) !important; }
+  html.light #root { background-color: #f6f6f8; }
+  html.light .bg-zinc-50 { background-color: #18181b !important; }
+  html.light .bg-zinc-100 { background-color: #18181b !important; }
+  html.light .text-zinc-900 { color: #fafafa !important; }
+  html.light .hover\:bg-white:hover { background-color: #27272a !important; }
+</style>
+</head>
+<body class="bg-zinc-950 text-zinc-100">
+<div id="root" class="min-h-screen"></div>
+
+<script>
+/* ================= Konstanta & util ================= */
+const STORAGE_KEY = "youtube-vault-accounts";
+const CATEGORY_STORAGE_KEY = "youtube-vault-categories";
+const FILTER_ORDER_KEY = "youtube-vault-filter-order";
+const INSTALL_DISMISS_KEY = "youtube-vault-install-dismissed";
+const THEME_KEY = "youtube-vault-theme";
+const DEFAULT_CATEGORIES = ["Pribadi", "Jualan", "Backup", "Lainnya"];
+const PHOTO_RATIO = "774 / 480";
+const DAY_NAMES_ID = ["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
+
+const CATEGORY_PALETTE = [
+  "text-red-400 border-red-500/40 bg-red-500/10",
+  "text-amber-300 border-amber-400/40 bg-amber-400/10",
+  "text-violet-300 border-violet-400/40 bg-violet-400/10",
+  "text-emerald-300 border-emerald-400/40 bg-emerald-400/10",
+  "text-sky-300 border-sky-400/40 bg-sky-400/10",
+  "text-orange-300 border-orange-400/40 bg-orange-400/10",
+  "text-pink-300 border-pink-500/40 bg-pink-500/10",
+  "text-rose-300 border-rose-400/40 bg-rose-400/10",
+];
+const CATEGORY_BORDER_PALETTE = [
+  "border-red-500/70","border-amber-400/70","border-violet-400/70","border-emerald-400/70",
+  "border-sky-400/70","border-orange-400/70","border-pink-400/70","border-rose-400/70",
+];
+
+function getCategoryColor(name, categories) {
+  const idx = categories.indexOf(name);
+  if (idx === -1) return "text-zinc-300 border-zinc-500/40 bg-zinc-500/10";
+  return CATEGORY_PALETTE[idx % CATEGORY_PALETTE.length];
+}
+function getCategoryBorderColor(name, categories) {
+  const idx = categories.indexOf(name);
+  if (idx === -1) return "border-zinc-500/60";
+  return CATEGORY_BORDER_PALETTE[idx % CATEGORY_BORDER_PALETTE.length];
+}
+function reconcileOrder(order, categories) {
+  const validSet = new Set(["Semua", ...categories]);
+  const seen = new Set();
+  let next = (order || []).filter((c) => {
+    if (!validSet.has(c) || seen.has(c)) return false;
+    seen.add(c); return true;
+  });
+  if (!next.includes("Semua")) next.unshift("Semua");
+  categories.forEach((c) => { if (!next.includes(c)) next.push(c); });
+  return next;
+}
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+function escapeHtml(s) {
+  return String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+}
+function isIOS() { return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream; }
+function isStandalone() {
+  return window.matchMedia?.("(display-mode: standalone)").matches || window.navigator.standalone === true;
+}
+function formatUpdatedAt(ts) {
+  if (!ts) return "-";
+  const d = new Date(ts);
+  const day = DAY_NAMES_ID[d.getDay()];
+  const hh = String(d.getHours()).padStart(2, "0");
+  const mm = String(d.getMinutes()).padStart(2, "0");
+  const diffMs = Date.now() - ts;
+  const diffSeconds = Math.floor(diffMs / 1000);
+  const diffMinutes = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+  let relative;
+  if (diffMinutes < 1) relative = `${Math.max(1, diffSeconds)} detik lalu`;
+  else if (diffHours < 1) relative = `${diffMinutes} menit lalu`;
+  else if (diffHours < 24) relative = `${diffHours} jam lalu`;
+  else relative = `${diffDays} hari lalu`;
+  return `${day} ${hh}:${mm} - ${relative}`;
+}
+function compressImage(file, maxSize = 640, quality = 0.72) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error("Gagal membaca file"));
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error("Gagal memuat gambar"));
+      img.onload = () => {
+        let { width, height } = img;
+        if (width > height && width > maxSize) { height = Math.round((height * maxSize) / width); width = maxSize; }
+        else if (height > maxSize) { width = Math.round((width * maxSize) / height); height = maxSize; }
+        const canvas = document.createElement("canvas");
+        canvas.width = width; canvas.height = height;
+        canvas.getContext("2d").drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL("image/jpeg", quality));
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+function formatBytes(bytes) {
+  if (bytes < 1024) return `${bytes}b`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(bytes / 1024 < 10 ? 1 : 0)}kb`;
+  return `${(bytes / 1024 / 1024).toFixed(1)}mb`;
+}
+function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+/* ================= Generator PDF murni JS ================= */
+function escapePdfText(str) {
+  let safe = "";
+  for (const ch of String(str ?? "")) {
+    const code = ch.codePointAt(0);
+    safe += code >= 32 && code <= 126 ? ch : "?";
+  }
+  return safe.replace(/\\/g, "\\\\").replace(/\(/g, "\\(").replace(/\)/g, "\\)");
+}
+function accountToPdfLines(a, idx) {
+  const lines = [];
+  lines.push(`${idx + 1}. @${a.username}  [${a.category}]`);
+  lines.push(`   Email/No HP : ${a.contact || "-"}`);
+  lines.push(`   Password    : ${a.password || "-"}`);
+  lines.push(`   Diperbarui  : ${formatUpdatedAt(a.updatedAt || a.createdAt)}`);
+  lines.push("");
+  return lines;
+}
+function buildPdfPages(accounts) {
+  const header = ["AKUN YOUTUBE VAULT", `Diekspor: ${new Date().toLocaleString("id-ID")}`, `Total akun: ${accounts.length}`, ""];
+  let allLines = [...header];
+  if (accounts.length === 0) allLines.push("Belum ada akun tersimpan.");
+  else accounts.forEach((a, i) => { allLines = allLines.concat(accountToPdfLines(a, i)); });
+  const LINES_PER_PAGE = 50;
+  const pages = [];
+  for (let i = 0; i < allLines.length; i += LINES_PER_PAGE) pages.push(allLines.slice(i, i + LINES_PER_PAGE));
+  return pages.length ? pages : [[""]];
+}
+function buildPdfDocument(pagesLines) {
+  let pdf = "%PDF-1.4\n";
+  const offsets = [];
+  function addObj(str) { offsets.push(pdf.length); pdf += str; }
+  addObj(`1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n`);
+  const kids = pagesLines.map((_, i) => `${4 + i * 2} 0 R`);
+  addObj(`2 0 obj\n<< /Type /Pages /Kids [${kids.join(" ")}] /Count ${pagesLines.length} >>\nendobj\n`);
+  addObj(`3 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\n`);
+  pagesLines.forEach((lines, i) => {
+    const pageObjNum = 4 + i * 2, contentObjNum = 5 + i * 2;
+    addObj(`${pageObjNum} 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents ${contentObjNum} 0 R >>\nendobj\n`);
+    let stream = "BT\n/F1 11 Tf\n14 TL\n50 792 Td\n";
+    lines.forEach((line, idx) => {
+      const escaped = escapePdfText(line);
+      stream += idx === 0 ? `(${escaped}) Tj\n` : `T*\n(${escaped}) Tj\n`;
+    });
+    stream += "ET";
+    addObj(`${contentObjNum} 0 obj\n<< /Length ${stream.length} >>\nstream\n${stream}\nendstream\nendobj\n`);
+  });
+  const xrefStart = pdf.length;
+  const totalObjs = offsets.length;
+  let xrefTable = `xref\n0 ${totalObjs + 1}\n0000000000 65535 f \n`;
+  offsets.forEach((off) => { xrefTable += `${String(off).padStart(10, "0")} 00000 n \n`; });
+  pdf += xrefTable;
+  pdf += `trailer\n<< /Size ${totalObjs + 1} /Root 1 0 R >>\nstartxref\n${xrefStart}\n%%EOF`;
+  return pdf;
+}
+function generatePdfBlob(accounts) {
+  return new Blob([buildPdfDocument(buildPdfPages(accounts))], { type: "application/pdf" });
+}
+
+/* ================= State ================= */
+const state = {
+  accounts: [],
+  categories: DEFAULT_CATEGORIES.slice(),
+  filterOrder: ["Semua", ...DEFAULT_CATEGORIES],
+  activeCategory: "Semua",
+  query: "",
+  loading: true,
+  editingId: null,
+  photoDataUrl: "",
+  addingCategory: false,
+  deferredPrompt: null,
+  showInstallBanner: false,
+  confirmDeleteId: null,
+  theme: "dark",
+};
+
+function applyTheme(theme) {
+  state.theme = theme;
+  document.documentElement.classList.toggle("light", theme === "light");
+  try { localStorage.setItem(THEME_KEY, theme); } catch {}
+}
+function toggleTheme() {
+  applyTheme(state.theme === "light" ? "dark" : "light");
+  render();
+}
+
+function persistAccounts(next) {
+  state.accounts = next;
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(next)); }
+  catch { showToast("Penyimpanan penuh, hapus foto/akun lama."); }
+}
+function persistCategories(next) {
+  state.categories = next;
+  try { localStorage.setItem(CATEGORY_STORAGE_KEY, JSON.stringify(next)); } catch {}
+}
+function persistFilterOrder(next) {
+  state.filterOrder = next;
+  try { localStorage.setItem(FILTER_ORDER_KEY, JSON.stringify(next)); } catch {}
+}
+
+function loadAll() {
+  let acc = [], cats = DEFAULT_CATEGORIES.slice(), order = ["Semua", ...DEFAULT_CATEGORIES];
+  try { const raw = localStorage.getItem(STORAGE_KEY); acc = raw ? JSON.parse(raw) : []; } catch {}
+  try {
+    const rawCat = localStorage.getItem(CATEGORY_STORAGE_KEY);
+    const parsed = rawCat ? JSON.parse(rawCat) : DEFAULT_CATEGORIES;
+    cats = parsed.length > 0 ? parsed : DEFAULT_CATEGORIES.slice();
+  } catch {}
+  try {
+    const rawOrder = localStorage.getItem(FILTER_ORDER_KEY);
+    order = rawOrder ? JSON.parse(rawOrder) : ["Semua", ...cats];
+  } catch {}
+  const reconciled = reconcileOrder(order, cats);
+  state.accounts = acc;
+  state.categories = cats;
+  state.filterOrder = reconciled;
+  state.activeCategory = reconciled[0] || "Semua";
+  try { localStorage.setItem(FILTER_ORDER_KEY, JSON.stringify(reconciled)); } catch {}
+  state.loading = false;
+}
+
+/* ================= Toast ================= */
+function showToast(msg) {
+  let el = document.getElementById("toast");
+  if (el) { el.remove(); }
+  el = document.createElement("div");
+  el.id = "toast";
+  el.className = "fixed bottom-6 left-1/2 z-50 px-4 py-2 rounded-full bg-zinc-100 text-zinc-900 text-sm font-medium shadow-lg flex items-center gap-2 toast-in";
+  el.style.left = "50%";
+  el.innerHTML = `<i data-lucide="check" class="h-4 w-4"></i><span>${escapeHtml(msg)}</span>`;
+  document.body.appendChild(el);
+  lucide.createIcons();
+  setTimeout(() => {
+    el.classList.remove("toast-in"); el.classList.add("toast-out");
+    setTimeout(() => el.remove(), 180);
+  }, 1600);
+}
+
+/* ================= Root render ================= */
+function render() {
+  const root = document.getElementById("root");
+  root.innerHTML = `
+    <div class="max-w-md mx-auto px-4 pt-8 pb-24">
+      <header class="mb-6">
+        <p class="text-xs uppercase tracking-[0.2em] text-zinc-600 mb-1">Vault</p>
+        <h1 class="text-3xl font-extrabold tracking-tight"><span class="text-zinc-50">Data Akun</span></h1>
+        <p class="text-sm text-zinc-500 mt-1" id="header-count"></p>
+      </header>
+      <div id="install-banner-slot"></div>
+      <div class="flex gap-2 mb-3">
+        <div class="relative" style="flex:6 6 0%">
+          <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-600"></i>
+          <input id="search-input" value="${escapeHtml(state.query)}" placeholder="Cari username..."
+            class="w-full rounded-xl bg-zinc-900 border border-zinc-800 pl-9 pr-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-red-500/50 transition-colors" />
+        </div>
+        <button id="theme-btn" style="flex:1 1 0%" class="rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 hover:text-indigo-400 hover:border-indigo-500/50 transition-colors press" aria-label="Ganti tema">
+          <i data-lucide="${state.theme === "light" ? "sun" : "moon"}" class="h-4 w-4"></i>
+        </button>
+        <button id="backup-btn" style="flex:1 1 0%" class="rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 hover:text-red-400 hover:border-red-500/50 transition-colors press" aria-label="Backup data">
+          <i data-lucide="database" class="h-4 w-4"></i>
+        </button>
+      </div>
+      <div id="filters-row" class="flex flex-wrap gap-2 mb-5 relative"></div>
+      <div id="grid-slot"></div>
+    </div>
+    <button id="fab-add" class="fixed bottom-6 right-6 h-14 w-14 rounded-full bg-zinc-50 text-zinc-900 flex items-center justify-center shadow-xl hover:bg-white transition-colors press" style="box-shadow:0 8px 24px rgba(0,0,0,0.5)" aria-label="Tambah akun">
+      <i data-lucide="plus" class="h-6 w-6"></i>
+    </button>
+    <input id="import-input" type="file" accept=".json,application/json" class="hidden" />
+  `;
+  renderHeaderCount();
+  renderInstallBanner();
+  renderFilters();
+  renderGrid();
+  lucide.createIcons();
+
+  document.getElementById("search-input").addEventListener("input", (e) => {
+    state.query = e.target.value;
+    renderGrid();
+    renderHeaderCount();
+  });
+  document.getElementById("backup-btn").addEventListener("click", openBackupSheet);
+  document.getElementById("theme-btn").addEventListener("click", toggleTheme);
+  document.getElementById("fab-add").addEventListener("click", () => openAccountModal(null));
+  document.getElementById("import-input").addEventListener("change", handleImportFile);
+}
+
+function renderHeaderCount() {
+  const el = document.getElementById("header-count");
+  if (!el) return;
+  let text = `${state.accounts.length} akun tersimpan`;
+  if (state.activeCategory !== "Semua") {
+    const n = state.accounts.filter((a) => a.category === state.activeCategory).length;
+    text += `, ${n} akun`;
+  }
+  el.textContent = text;
+}
+
+function renderInstallBanner() {
+  const slot = document.getElementById("install-banner-slot");
+  if (!slot) return;
+  if (!state.showInstallBanner) { slot.innerHTML = ""; return; }
+  const iosHint = isIOS();
+  slot.innerHTML = `
+    <div class="mb-5 rounded-2xl border border-zinc-800 bg-zinc-900 p-4 flex items-start gap-3 banner-in">
+      <div class="h-10 w-10 rounded-xl bg-zinc-800 flex items-center justify-center shrink-0">
+        <i data-lucide="download" class="h-5 w-5 text-red-400"></i>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="text-sm font-semibold text-zinc-100">Pasang sebagai aplikasi</p>
+        ${iosHint
+          ? `<p class="text-xs text-zinc-500 mt-0.5">Tap tombol <i data-lucide="share" class="inline h-3 w-3 mx-0.5"></i> Share di Safari, lalu pilih "Add to Home Screen".</p>`
+          : `<p class="text-xs text-zinc-500 mt-0.5">Biar bisa dibuka kayak aplikasi biasa, tanpa address bar.</p>
+             <button id="install-now-btn" class="mt-2 text-xs font-semibold rounded-full bg-zinc-50 text-zinc-900 px-3 py-1.5 hover:bg-white transition-colors press">Install sekarang</button>`}
+      </div>
+      <button id="install-dismiss-btn" class="text-zinc-600 hover:text-zinc-300 shrink-0 press-sm" aria-label="Tutup"><i data-lucide="x" class="h-4 w-4"></i></button>
+    </div>`;
+  lucide.createIcons();
+  const installBtn = document.getElementById("install-now-btn");
+  if (installBtn) installBtn.addEventListener("click", handleInstallClick);
+  document.getElementById("install-dismiss-btn").addEventListener("click", () => {
+    state.showInstallBanner = false;
+    localStorage.setItem(INSTALL_DISMISS_KEY, "1");
+    renderInstallBanner();
+  });
+}
+
+async function handleInstallClick() {
+  if (!state.deferredPrompt) return;
+  state.deferredPrompt.prompt();
+  const { outcome } = await state.deferredPrompt.userChoice;
+  if (outcome === "accepted") showToast("Aplikasi terpasang");
+  state.deferredPrompt = null;
+  state.showInstallBanner = false;
+  renderInstallBanner();
+}
+
+/* ================= Filter chips (reorderable) ================= */
+let dragState = null;
+
+function renderFilters() {
+  const row = document.getElementById("filters-row");
+  if (!row) return;
+  const oldRects = {};
+  row.querySelectorAll("[data-chip]").forEach((el) => { oldRects[el.dataset.chip] = el.getBoundingClientRect(); });
+
+  row.innerHTML = state.filterOrder.map((name) => {
+    const isSemua = name === "Semua";
+    const active = state.activeCategory === name;
+    const colorClass = active
+      ? (isSemua ? "bg-zinc-100 text-zinc-900 border-zinc-100" : getCategoryColor(name, state.categories))
+      : "text-zinc-500 border-zinc-800 hover:border-zinc-700";
+    return `<button type="button" data-chip="${escapeHtml(name)}" style="touch-action:none"
+      class="chip select-none shrink-0 px-3 py-1.5 rounded-full text-xs border ${colorClass}">${escapeHtml(name)}</button>`;
+  }).join("");
+
+  row.querySelectorAll("[data-chip]").forEach((el) => {
+    const name = el.dataset.chip;
+    const oldRect = oldRects[name];
+    if (oldRect) {
+      const newRect = el.getBoundingClientRect();
+      const dx = oldRect.left - newRect.left, dy = oldRect.top - newRect.top;
+      if (dx || dy) {
+        el.style.transition = "none";
+        el.style.transform = `translate(${dx}px, ${dy}px)`;
+        requestAnimationFrame(() => {
+          el.style.transition = "";
+          el.style.transform = "";
+        });
+      }
+    }
+    el.addEventListener("pointerdown", (e) => onChipPointerDown(e, name, el));
+  });
+}
+
+function onChipPointerDown(e, name, el) {
+  const startX = e.clientX, startY = e.clientY;
+  let longPressTimer = setTimeout(() => startChipDrag(name, el, startX, startY), 550);
+
+  function onMove(ev) {
+    const dx = Math.abs(ev.clientX - startX), dy = Math.abs(ev.clientY - startY);
+    if (!dragState && (dx > 10 || dy > 10)) { clearTimeout(longPressTimer); }
+  }
+  function onUp() {
+    clearTimeout(longPressTimer);
+    window.removeEventListener("pointermove", onMove);
+    window.removeEventListener("pointerup", onUp);
+    if (!dragState) {
+      state.activeCategory = name;
+      renderFilters();
+      renderGrid();
+      renderHeaderCount();
+    }
+  }
+  window.addEventListener("pointermove", onMove);
+  window.addEventListener("pointerup", onUp);
+}
+
+function startChipDrag(name, el, startX, startY) {
+  const rect = el.getBoundingClientRect();
+  dragState = { name, startRect: rect, startX, startY };
+  if (navigator.vibrate) navigator.vibrate(15);
+  el.style.opacity = "0.3";
+
+  const clone = document.createElement("div");
+  clone.id = "chip-clone";
+  clone.textContent = name;
+  const isSemua = name === "Semua";
+  const colorClasses = isSemua ? "bg-zinc-100 text-zinc-900 border-zinc-100" : "text-zinc-50 bg-zinc-800 " + getCategoryBorderColor(name, state.categories);
+  clone.className = `flex items-center justify-center rounded-full text-xs font-medium shadow-2xl border-2 ${colorClasses}`;
+  Object.assign(clone.style, {
+    position: "fixed", left: rect.left + "px", top: rect.top + "px",
+    width: rect.width + "px", height: rect.height + "px", zIndex: 100, pointerEvents: "none",
+  });
+  document.body.appendChild(clone);
+
+  function onMove(e) {
+    const dx = e.clientX - startX, dy = e.clientY - startY;
+    clone.style.left = (rect.left + dx) + "px";
+    clone.style.top = (rect.top + dy) + "px";
+
+    const current = state.filterOrder;
+    const draggedIdx = current.indexOf(name);
+    const chips = document.querySelectorAll("[data-chip]");
+    for (const chipEl of chips) {
+      const otherName = chipEl.dataset.chip;
+      if (otherName === name) continue;
+      const r = chipEl.getBoundingClientRect();
+      if (e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom) {
+        const targetIdx = current.indexOf(otherName);
+        if (targetIdx !== -1 && targetIdx !== draggedIdx) {
+          const next = [...current];
+          next.splice(draggedIdx, 1);
+          next.splice(targetIdx, 0, name);
+          state.filterOrder = next;
+          renderFilters();
+          const newEl = document.querySelector(`[data-chip="${CSS.escape(name)}"]`);
+          if (newEl) newEl.style.opacity = "0.3";
+        }
+        break;
+      }
+    }
+  }
+  function onUp() {
+    window.removeEventListener("pointermove", onMove);
+    window.removeEventListener("pointerup", onUp);
+    window.removeEventListener("pointercancel", onUp);
+    clone.remove();
+    persistFilterOrder(state.filterOrder);
+    dragState = null;
+    renderFilters();
+  }
+  window.addEventListener("pointermove", onMove);
+  window.addEventListener("pointerup", onUp);
+  window.addEventListener("pointercancel", onUp);
+}
+
+/* ================= Grid akun ================= */
+function getFiltered() {
+  return state.accounts.filter((a) => {
+    const q = a.username.toLowerCase().includes(state.query.toLowerCase());
+    const c = state.activeCategory === "Semua" || a.category === state.activeCategory;
+    return q && c;
+  });
+}
+
+function accountCardHtml(a) {
+  const photoHtml = a.photo
+    ? `<img src="${a.photo}" alt="" class="w-full h-full object-cover" />`
+    : `<div class="w-full h-full flex items-center justify-center"><i data-lucide="user" class="h-8 w-8 text-zinc-600"></i></div>`;
+  const descHtml = a.description
+    ? `<p class="mt-2.5 pt-2.5 border-t border-zinc-800 text-[11px] text-zinc-400 leading-relaxed line-clamp-3">${escapeHtml(a.description)}</p>`
+    : "";
+  const timeClass = a.description ? "mt-1" : "mt-2.5 pt-2.5 border-t border-zinc-800";
+  return `
+  <div class="rounded-2xl bg-zinc-900 border border-zinc-800 overflow-hidden card-in" data-account-card="${a.id}">
+    <div class="relative w-full bg-zinc-800" style="aspect-ratio:${PHOTO_RATIO}">
+      ${photoHtml}
+      <div class="absolute top-1.5 left-1.5 right-1.5 flex items-start justify-between gap-1">
+        <span class="text-[9px] uppercase tracking-wide font-bold px-2 py-1 rounded-full bg-black/50 backdrop-blur-sm border-2 shadow-sm text-white ${getCategoryBorderColor(a.category, state.categories)}">${escapeHtml(a.category)}</span>
+        <div class="flex gap-1 shrink-0">
+          <button data-edit="${a.id}" class="p-1.5 rounded-full bg-black/50 backdrop-blur-sm border border-white/10 text-white hover:text-red-400 transition-colors press-sm" aria-label="Edit akun"><i data-lucide="pencil" class="h-3 w-3"></i></button>
+          <button data-delete="${a.id}" class="p-1.5 rounded-full bg-black/50 backdrop-blur-sm border border-white/10 text-white hover:text-pink-400 transition-colors press-sm" aria-label="Hapus akun"><i data-lucide="trash-2" class="h-3 w-3"></i></button>
+        </div>
+      </div>
+    </div>
+    <div class="p-3">
+      <div class="flex items-center gap-1.5">
+        <p class="text-sm font-semibold text-zinc-50 truncate flex-1">@${escapeHtml(a.username)}</p>
+        <button data-copy="${escapeHtml(a.username)}" class="text-zinc-500 hover:text-red-400 transition-colors shrink-0 press-sm" aria-label="Salin username"><i data-lucide="copy" class="h-3 w-3"></i></button>
+      </div>
+      <div class="mt-2.5 space-y-1.5">
+        ${copyFieldHtml("at-sign", a.contact, true, "Belum ada email/nomor")}
+        ${copyFieldHtml("lock", a.password, true, "Belum ada password")}
+      </div>
+      ${descHtml}
+      <div class="flex items-center gap-1.5 text-[10.5px] text-zinc-300 ${timeClass}">
+        <i data-lucide="clock" class="h-3 w-3 shrink-0 text-red-500"></i>
+        <span>${formatUpdatedAt(a.updatedAt || a.createdAt)}</span>
+      </div>
+    </div>
+  </div>`;
+}
+
+function copyFieldHtml(icon, value, mask, placeholder) {
+  const display = value ? "•".repeat(Math.min(value.length, 12)) : escapeHtml(placeholder);
+  const valAttr = escapeHtml(value || "");
+  return `
+  <div class="flex items-center gap-1.5 text-xs text-zinc-400" data-field data-value="${valAttr}" data-revealed="0">
+    <i data-lucide="${icon}" class="h-3 w-3 shrink-0 text-zinc-600"></i>
+    <span class="flex-1 truncate font-mono text-zinc-300" data-field-display>${display}</span>
+    ${value ? `<button data-toggle-reveal class="text-zinc-500 hover:text-zinc-200 transition-colors shrink-0 press-sm" aria-label="Tampilkan"><i data-lucide="eye" class="h-3 w-3"></i></button>` : ""}
+    ${value ? `<button data-copy-field class="text-zinc-500 hover:text-red-400 transition-colors shrink-0 press-sm" aria-label="Salin"><i data-lucide="copy" class="h-3 w-3"></i></button>` : ""}
+  </div>`;
+}
+
+function renderGrid() {
+  const slot = document.getElementById("grid-slot");
+  if (!slot) return;
+  if (state.loading) {
+    slot.innerHTML = `<p class="text-zinc-600 text-sm text-center py-16">Memuat data...</p>`;
+    return;
+  }
+  const filtered = getFiltered();
+  if (filtered.length === 0) {
+    slot.innerHTML = `<div class="text-center py-16 fade-in"><p class="text-zinc-500 text-sm">${
+      state.accounts.length === 0 ? "Belum ada akun. Tambahkan akun YouTube pertamamu." : "Tidak ada akun yang cocok."
+    }</p></div>`;
+    return;
+  }
+  slot.innerHTML = `<div class="grid grid-cols-2 gap-3">${filtered.map(accountCardHtml).join("")}</div>`;
+  lucide.createIcons();
+
+  slot.querySelectorAll("[data-edit]").forEach((btn) => btn.addEventListener("click", () => {
+    const acc = state.accounts.find((a) => a.id === btn.dataset.edit);
+    if (acc) openAccountModal(acc);
+  }));
+  slot.querySelectorAll("[data-delete]").forEach((btn) => btn.addEventListener("click", () => openConfirmDelete(btn.dataset.delete)));
+  slot.querySelectorAll("[data-copy]").forEach((btn) => btn.addEventListener("click", () => copyToClipboard(btn.dataset.copy)));
+  slot.querySelectorAll("[data-field]").forEach((field) => {
+    const value = field.dataset.value;
+    const toggleBtn = field.querySelector("[data-toggle-reveal]");
+    const copyBtn = field.querySelector("[data-copy-field]");
+    const display = field.querySelector("[data-field-display]");
+    if (toggleBtn) toggleBtn.addEventListener("click", () => {
+      const revealed = field.dataset.revealed === "1";
+      field.dataset.revealed = revealed ? "0" : "1";
+      display.textContent = revealed ? "•".repeat(Math.min(value.length, 12)) : value;
+      toggleBtn.innerHTML = `<i data-lucide="${revealed ? "eye" : "eye-off"}" class="h-3 w-3"></i>`;
+      lucide.createIcons();
+    });
+    if (copyBtn) copyBtn.addEventListener("click", () => copyToClipboard(value));
+  });
+}
+
+async function copyToClipboard(value) {
+  try { await navigator.clipboard.writeText(value); showToast("Disalin ke clipboard"); }
+  catch { showToast("Gagal menyalin"); }
+}
+
+function removeAccountCardAnimated(id, after) {
+  const el = document.querySelector(`[data-account-card="${id}"]`);
+  if (!el) { after(); return; }
+  el.classList.remove("card-in"); el.classList.add("card-out");
+  setTimeout(after, 150);
+}
+
+/* ================= Confirm delete ================= */
+function openConfirmDelete(id) {
+  state.confirmDeleteId = id;
+  const overlay = document.createElement("div");
+  overlay.id = "confirm-overlay";
+  overlay.className = "fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 fade-in";
+  overlay.innerHTML = `
+    <div class="w-full max-w-xs bg-zinc-900 border border-zinc-800 rounded-2xl p-5 text-center pop-in">
+      <p class="text-zinc-100 font-medium mb-1">Hapus akun ini?</p>
+      <p class="text-zinc-500 text-sm mb-4">Data yang dihapus tidak bisa dikembalikan.</p>
+      <div class="flex gap-2">
+        <button id="confirm-cancel" class="flex-1 rounded-xl border border-zinc-700 py-2.5 text-sm text-zinc-300 hover:bg-zinc-800 press">Batal</button>
+        <button id="confirm-ok" class="flex-1 rounded-xl bg-pink-500 py-2.5 text-sm font-semibold text-white hover:bg-pink-600 press">Hapus</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  document.getElementById("confirm-cancel").addEventListener("click", closeConfirmDelete);
+  overlay.addEventListener("click", (e) => { if (e.target === overlay) closeConfirmDelete(); });
+  document.getElementById("confirm-ok").addEventListener("click", () => {
+    const id2 = state.confirmDeleteId;
+    closeConfirmDelete();
+    removeAccountCardAnimated(id2, () => {
+      persistAccounts(state.accounts.filter((a) => a.id !== id2));
+      renderGrid(); renderHeaderCount();
+      showToast("Akun dihapus");
+    });
+  });
+}
+function closeConfirmDelete() {
+  const overlay = document.getElementById("confirm-overlay");
+  if (!overlay) return;
+  overlay.classList.remove("fade-in"); overlay.classList.add("fade-out");
+  setTimeout(() => overlay.remove(), 160);
+  state.confirmDeleteId = null;
+}
+
+/* ================= Account modal (tambah/edit) ================= */
+function openAccountModal(existing) {
+  state.editingId = existing ? existing.id : null;
+  state.photoDataUrl = existing ? existing.photo || "" : "";
+  state.addingCategory = false;
+
+  const overlay = document.createElement("div");
+  overlay.id = "account-overlay";
+  overlay.className = "fixed inset-0 z-40 flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm p-0 sm:p-4 fade-in";
+  overlay.innerHTML = `
+    <div id="account-panel" class="w-full sm:max-w-md bg-zinc-900 border border-zinc-800 rounded-t-3xl sm:rounded-3xl p-5 max-h-[90vh] overflow-y-auto sheet-in">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-extrabold tracking-tight text-zinc-50">${existing ? "Edit Akun" : "Tambah Akun"}</h2>
+        <button id="account-close" class="text-zinc-500 hover:text-zinc-200 press-sm" aria-label="Tutup"><i data-lucide="x" class="h-5 w-5"></i></button>
+      </div>
+
+      <div class="mb-5">
+        <button id="photo-btn" type="button" class="relative w-full block rounded-2xl overflow-hidden bg-zinc-800 border border-zinc-700 press" style="aspect-ratio:${PHOTO_RATIO}" aria-label="Unggah foto">
+          <div id="photo-preview">${photoPreviewHtml()}</div>
+          <span class="absolute bottom-2 right-2 h-8 w-8 rounded-full bg-zinc-100 text-zinc-900 flex items-center justify-center"><i data-lucide="upload" class="h-4 w-4"></i></span>
+        </button>
+        <input id="photo-input" type="file" accept="image/*" class="hidden" />
+      </div>
+      <p id="photo-busy" class="text-center text-xs text-zinc-500 mb-3 hidden">Memproses foto...</p>
+
+      <div class="space-y-3">
+        <div>
+          <label class="text-xs text-zinc-500 mb-1 block">Username</label>
+          <input id="f-username" value="${escapeHtml(existing?.username || "")}" placeholder="namachannel" class="w-full rounded-xl bg-zinc-800 border border-zinc-700 px-3 py-2.5 text-zinc-50 placeholder-zinc-600 focus:outline-none focus:border-red-500/60 transition-colors" />
+        </div>
+        <div>
+          <label class="text-xs text-zinc-500 mb-1 block">Email / Nomor HP</label>
+          <input id="f-contact" value="${escapeHtml(existing?.contact || "")}" placeholder="email@contoh.com atau 08xxxxxxxxxx" class="w-full rounded-xl bg-zinc-800 border border-zinc-700 px-3 py-2.5 text-zinc-50 placeholder-zinc-600 focus:outline-none focus:border-red-500/60 transition-colors" />
+        </div>
+        <div>
+          <label class="text-xs text-zinc-500 mb-1 block">Password</label>
+          <input id="f-password" value="${escapeHtml(existing?.password || "")}" placeholder="Password akun" class="w-full rounded-xl bg-zinc-800 border border-zinc-700 px-3 py-2.5 text-zinc-50 placeholder-zinc-600 focus:outline-none focus:border-red-500/60 transition-colors" />
+        </div>
+        <div class="pt-5 mt-2 border-t border-zinc-800">
+          <label class="text-xs text-zinc-500 mb-1 block">Deskripsi (opsional)</label>
+          <textarea id="f-description" rows="3" placeholder="Catatan tambahan soal akun ini..." class="w-full rounded-xl bg-zinc-800 border border-zinc-700 px-3 py-2.5 text-zinc-50 placeholder-zinc-600 focus:outline-none focus:border-red-500/60 resize-none transition-colors">${escapeHtml(existing?.description || "")}</textarea>
+        </div>
+        <div class="pt-1">
+          <label class="text-xs text-zinc-500 mb-1 block">Kategori</label>
+          <div id="category-chips" class="flex flex-wrap gap-2"></div>
+        </div>
+      </div>
+
+      <p id="form-error" class="text-pink-400 text-sm mt-3 hidden"></p>
+
+      <div class="mt-5 flex gap-2">
+        <button id="save-btn" style="flex:${existing ? "3 3 0%" : "1 1 100%"}" class="rounded-xl bg-zinc-50 text-zinc-900 font-bold py-3 hover:bg-white transition-colors press">Simpan Akun</button>
+        ${existing ? `
+        <button id="toggle-time-btn" type="button" style="flex:1 1 0%" class="rounded-xl border flex flex-col items-center justify-center gap-1 py-2 transition-colors bg-red-500/10 border-red-500/50 press">
+          <span class="text-[8px] uppercase tracking-wide text-zinc-400">Waktu</span>
+          <div id="toggle-track" class="h-5 w-9 rounded-full flex items-center px-0.5 transition-colors bg-red-500 justify-end">
+            <span class="h-4 w-4 rounded-full bg-white block shadow"></span>
+          </div>
+        </button>` : ""}
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  lucide.createIcons();
+
+  state.selectedCategory = existing?.category || state.categories[0];
+  state.updateTimestamp = true;
+  renderCategoryChips();
+
+  overlay.addEventListener("click", (e) => { if (e.target === overlay) closeAccountModal(); });
+  document.getElementById("account-close").addEventListener("click", closeAccountModal);
+  document.getElementById("photo-btn").addEventListener("click", () => document.getElementById("photo-input").click());
+  document.getElementById("photo-input").addEventListener("change", handlePhotoFile);
+  document.getElementById("save-btn").addEventListener("click", () => handleSaveAccount(existing));
+
+  const toggleBtn = document.getElementById("toggle-time-btn");
+  if (toggleBtn) toggleBtn.addEventListener("click", () => {
+    state.updateTimestamp = !state.updateTimestamp;
+    const track = document.getElementById("toggle-track");
+    track.className = `h-5 w-9 rounded-full flex items-center px-0.5 transition-colors ${state.updateTimestamp ? "bg-red-500 justify-end" : "bg-zinc-600 justify-start"}`;
+    toggleBtn.className = `rounded-xl border flex flex-col items-center justify-center gap-1 py-2 transition-colors press ${state.updateTimestamp ? "bg-red-500/10 border-red-500/50" : "bg-zinc-800 border-zinc-700"}`;
+  });
+}
+
+function photoPreviewHtml() {
+  if (state.photoDataUrl) return `<img src="${state.photoDataUrl}" alt="" class="w-full h-full object-cover" />`;
+  return `<div class="w-full h-full flex flex-col items-center justify-center gap-1.5 text-zinc-500"><i data-lucide="upload" class="h-6 w-6"></i><span class="text-xs">Unggah foto</span></div>`;
+}
+
+async function handlePhotoFile(e) {
+  const file = e.target.files?.[0];
+  if (!file) return;
+  document.getElementById("photo-busy").classList.remove("hidden");
+  try {
+    state.photoDataUrl = await compressImage(file);
+    document.getElementById("photo-preview").innerHTML = photoPreviewHtml();
+    lucide.createIcons();
+  } catch {
+    showFormError("Gagal memproses foto, coba foto lain.");
+  } finally {
+    document.getElementById("photo-busy").classList.add("hidden");
+  }
+}
+
+function renderCategoryChips() {
+  const wrap = document.getElementById("category-chips");
+  if (!wrap) return;
+  wrap.innerHTML = state.categories.map((c) => {
+    const active = state.selectedCategory === c;
+    const cls = active ? getCategoryColor(c, state.categories) : "text-zinc-500 border-zinc-700";
+    const delBtn = state.categories.length > 1
+      ? `<button data-del-cat="${escapeHtml(c)}" class="p-0.5 rounded-full hover:bg-black/30 opacity-70 hover:opacity-100 transition-opacity press-sm" aria-label="Hapus kategori ${escapeHtml(c)}"><i data-lucide="x" class="h-3 w-3"></i></button>`
+      : "";
+    return `<div class="flex items-center gap-1 rounded-full border pl-3 pr-1.5 py-1 text-xs ${cls}">
+      <button data-select-cat="${escapeHtml(c)}">${escapeHtml(c)}</button>${delBtn}
+    </div>`;
+  }).join("") + (
+    state.addingCategory
+      ? `<div class="flex items-center gap-1">
+           <input id="new-cat-input" placeholder="Nama kategori" class="w-28 rounded-full bg-zinc-800 border border-red-500/50 px-3 py-1.5 text-xs text-zinc-50 placeholder-zinc-600 focus:outline-none" />
+           <button id="confirm-new-cat" class="p-1.5 rounded-full bg-zinc-800 border border-zinc-700 text-red-400 press-sm" aria-label="Simpan kategori"><i data-lucide="check" class="h-3.5 w-3.5"></i></button>
+         </div>`
+      : `<button id="add-cat-btn" class="px-3 py-1.5 rounded-full text-xs border border-dashed border-zinc-700 text-zinc-500 hover:border-zinc-500 hover:text-zinc-300 transition-colors flex items-center gap-1 press">
+           <i data-lucide="plus" class="h-3 w-3"></i>Tambah
+         </button>`
+  );
+  lucide.createIcons();
+
+  wrap.querySelectorAll("[data-select-cat]").forEach((btn) => btn.addEventListener("click", () => {
+    state.selectedCategory = btn.dataset.selectCat;
+    renderCategoryChips();
+  }));
+  wrap.querySelectorAll("[data-del-cat]").forEach((btn) => btn.addEventListener("click", () => {
+    const name = btn.dataset.delCat;
+    if (state.categories.length <= 1) return;
+    const nextCategories = state.categories.filter((c) => c !== name);
+    persistCategories(nextCategories);
+    persistFilterOrder(reconcileOrder(state.filterOrder, nextCategories));
+    if (state.activeCategory === name) state.activeCategory = "Semua";
+    if (state.selectedCategory === name) state.selectedCategory = nextCategories[0];
+    showToast("Kategori dihapus");
+    renderCategoryChips();
+  }));
+  const addBtn = document.getElementById("add-cat-btn");
+  if (addBtn) addBtn.addEventListener("click", () => { state.addingCategory = true; renderCategoryChips(); document.getElementById("new-cat-input")?.focus(); });
+  const confirmBtn = document.getElementById("confirm-new-cat");
+  if (confirmBtn) {
+    const input = document.getElementById("new-cat-input");
+    input.focus();
+    const confirm = () => {
+      const name = input.value.trim();
+      state.addingCategory = false;
+      if (name) {
+        const exists = state.categories.some((c) => c.toLowerCase() === name.toLowerCase());
+        if (!exists) {
+          const nextCategories = [...state.categories, name];
+          persistCategories(nextCategories);
+          persistFilterOrder(reconcileOrder(state.filterOrder, nextCategories));
+          showToast("Kategori ditambahkan");
+        }
+        state.selectedCategory = name;
+      }
+      renderCategoryChips();
+    };
+    confirmBtn.addEventListener("click", confirm);
+    input.addEventListener("keydown", (e) => { if (e.key === "Enter") confirm(); });
+  }
+}
+
+function showFormError(msg) {
+  const el = document.getElementById("form-error");
+  el.textContent = msg;
+  el.classList.remove("hidden");
+}
+
+function handleSaveAccount(existing) {
+  const username = document.getElementById("f-username").value.trim().replace(/^@/, "");
+  if (!username) { showFormError("Username wajib diisi."); return; }
+  const now = Date.now();
+  const updatedAt = existing && !state.updateTimestamp ? (existing.updatedAt || existing.createdAt) : now;
+  const account = {
+    id: existing?.id || uid(),
+    username,
+    contact: document.getElementById("f-contact").value.trim(),
+    password: document.getElementById("f-password").value,
+    description: document.getElementById("f-description").value.trim(),
+    category: state.selectedCategory,
+    photo: state.photoDataUrl,
+    createdAt: existing?.createdAt || now,
+    updatedAt,
+  };
+  const exists = state.accounts.some((a) => a.id === account.id);
+  let next;
+  if (!exists) {
+    next = [account, ...state.accounts];
+  } else if (state.updateTimestamp) {
+    // Waktu di-update = dianggap "baru", pindah ke paling atas
+    next = [account, ...state.accounts.filter((a) => a.id !== account.id)];
+  } else {
+    // Toggle waktu off = bukan baru, posisi tetap di tempat semula
+    next = state.accounts.map((a) => (a.id === account.id ? account : a));
+  }
+  persistAccounts(next);
+  closeAccountModal();
+  renderGrid(); renderHeaderCount();
+  showToast(exists ? "Akun diperbarui" : "Akun ditambahkan");
+}
+
+function closeAccountModal() {
+  const overlay = document.getElementById("account-overlay");
+  if (!overlay) return;
+  const panel = document.getElementById("account-panel");
+  overlay.classList.remove("fade-in"); overlay.classList.add("fade-out");
+  panel.classList.remove("sheet-in"); panel.classList.add("sheet-out");
+  setTimeout(() => overlay.remove(), 180);
+}
+
+/* ================= Backup sheet ================= */
+function openBackupSheet() {
+  const jsonPayload = JSON.stringify({ accounts: state.accounts, categories: state.categories, filterOrder: state.filterOrder, exportedAt: Date.now(), version: 2 }, null, 2);
+  const jsonSize = formatBytes(new Blob([jsonPayload]).size);
+  const pdfBlob = generatePdfBlob(state.accounts);
+  const pdfSize = formatBytes(pdfBlob.size);
+
+  const overlay = document.createElement("div");
+  overlay.id = "backup-overlay";
+  overlay.className = "fixed inset-0 z-40 flex items-end justify-center bg-black/70 backdrop-blur-sm fade-in";
+  overlay.innerHTML = `
+    <div id="backup-panel" class="w-full sm:max-w-md bg-zinc-900 border border-zinc-800 rounded-t-3xl p-5 sheet-in">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-extrabold tracking-tight text-zinc-50">Backup Data</h2>
+        <button id="backup-close" class="text-zinc-500 hover:text-zinc-200 press-sm" aria-label="Tutup"><i data-lucide="x" class="h-5 w-5"></i></button>
+      </div>
+      <div class="space-y-2 pb-2">
+        <button id="export-json-btn" class="w-full flex items-center gap-3 rounded-2xl bg-zinc-800 border border-zinc-700 p-3.5 hover:border-red-500/50 transition-colors text-left press">
+          <div class="h-10 w-10 rounded-xl bg-zinc-900 flex items-center justify-center shrink-0"><i data-lucide="download" class="h-5 w-5 text-red-400"></i></div>
+          <div class="flex-1 min-w-0"><p class="text-sm font-semibold text-zinc-100">Download Data</p><p class="text-xs text-zinc-500">File cadangan (.json), bisa dimasukin lagi nanti</p></div>
+          <span class="text-xs text-zinc-500 shrink-0">${jsonSize}</span>
+        </button>
+        <button id="import-btn" class="w-full flex items-center gap-3 rounded-2xl bg-zinc-800 border border-zinc-700 p-3.5 hover:border-red-500/50 transition-colors text-left press">
+          <div class="h-10 w-10 rounded-xl bg-zinc-900 flex items-center justify-center shrink-0"><i data-lucide="upload" class="h-5 w-5 text-red-400"></i></div>
+          <div class="flex-1 min-w-0"><p class="text-sm font-semibold text-zinc-100">Masukan Data</p><p class="text-xs text-zinc-500">Akun baru ditambahin, yang udah ada dilewat otomatis</p></div>
+        </button>
+        <button id="export-pdf-btn" class="w-full flex items-center gap-3 rounded-2xl bg-zinc-800 border border-zinc-700 p-3.5 hover:border-pink-400/50 transition-colors text-left press">
+          <div class="h-10 w-10 rounded-xl bg-zinc-900 flex items-center justify-center shrink-0"><i data-lucide="file-text" class="h-5 w-5 text-pink-300"></i></div>
+          <div class="flex-1 min-w-0"><p class="text-sm font-semibold text-zinc-100">Download PDF</p><p class="text-xs text-zinc-500">Bisa dibuka & dibaca di WPS / Word</p></div>
+          <span class="text-xs text-zinc-500 shrink-0">${pdfSize}</span>
+        </button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  lucide.createIcons();
+
+  overlay.addEventListener("click", (e) => { if (e.target === overlay) closeBackupSheet(); });
+  document.getElementById("backup-close").addEventListener("click", closeBackupSheet);
+  document.getElementById("export-json-btn").addEventListener("click", () => {
+    downloadBlob(new Blob([jsonPayload], { type: "application/json" }), `youtube-vault-backup-${dateStr()}.json`);
+    showToast("Data diunduh");
+  });
+  document.getElementById("export-pdf-btn").addEventListener("click", () => {
+    downloadBlob(pdfBlob, `youtube-vault-${dateStr()}.pdf`);
+    showToast("PDF diunduh");
+  });
+  document.getElementById("import-btn").addEventListener("click", () => document.getElementById("import-input").click());
+}
+function closeBackupSheet() {
+  const overlay = document.getElementById("backup-overlay");
+  if (!overlay) return;
+  const panel = document.getElementById("backup-panel");
+  overlay.classList.remove("fade-in"); overlay.classList.add("fade-out");
+  panel.classList.remove("sheet-in"); panel.classList.add("sheet-out");
+  setTimeout(() => overlay.remove(), 180);
+}
+function dateStr() { return new Date().toISOString().slice(0, 10); }
+
+function handleImportFile(e) {
+  const file = e.target.files?.[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const parsed = JSON.parse(String(reader.result));
+      const importedAccounts = Array.isArray(parsed.accounts) ? parsed.accounts : [];
+      const importedCategories = Array.isArray(parsed.categories) && parsed.categories.length > 0 ? parsed.categories : DEFAULT_CATEGORIES;
+      const importedOrder = Array.isArray(parsed.filterOrder)
+        ? reconcileOrder(parsed.filterOrder, importedCategories)
+        : reconcileOrder(["Semua", ...importedCategories], importedCategories);
+
+      const existingUsernames = new Set(state.accounts.map((a) => (a.username || "").toLowerCase()));
+      const newOnes = importedAccounts.filter((a) => a.username && !existingUsernames.has(a.username.toLowerCase()));
+
+      if (newOnes.length === 0) { showToast("Data sudah ada semua"); e.target.value = ""; return; }
+
+      const existingCategoryKeys = new Set(state.categories.map((c) => c.toLowerCase()));
+      const newCategoryNames = importedCategories.filter((c) => !existingCategoryKeys.has(c.toLowerCase()));
+      const mergedCategories = [...state.categories, ...newCategoryNames];
+      const mergedOrder = reconcileOrder([...state.filterOrder, ...importedOrder], mergedCategories);
+
+      persistAccounts([...newOnes, ...state.accounts]);
+      persistCategories(mergedCategories);
+      persistFilterOrder(mergedOrder);
+      renderFilters(); renderGrid(); renderHeaderCount();
+      showToast(`${newOnes.length} akun baru ditambahkan`);
+      closeBackupSheet();
+    } catch { showToast("File tidak valid"); }
+  };
+  reader.onerror = () => showToast("Gagal membaca file");
+  reader.readAsText(file);
+  e.target.value = "";
+}
+
+/* ================= Init ================= */
+function init() {
+  let savedTheme = "dark";
+  try { savedTheme = localStorage.getItem(THEME_KEY) || "dark"; } catch {}
+  applyTheme(savedTheme);
+
+  loadAll();
+  render();
+
+  if (!isStandalone() && !localStorage.getItem(INSTALL_DISMISS_KEY)) {
+    if (isIOS()) {
+      state.showInstallBanner = true;
+      renderInstallBanner();
+    } else {
+      window.addEventListener("beforeinstallprompt", (e) => {
+        e.preventDefault();
+        state.deferredPrompt = e;
+        state.showInstallBanner = true;
+        renderInstallBanner();
+      });
+    }
+  }
+
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("/sw.js").catch((err) => console.error("Gagal mendaftarkan service worker:", err));
+    });
+  }
+}
+
+init();
+</script>
+</body>
+</html>
