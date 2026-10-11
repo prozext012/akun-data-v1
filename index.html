@@ -1051,14 +1051,18 @@ function openAIPage(push=true) {
     try { const result=await handleAICommand(q,addMsg); if(result!==null){addMsg("assistant",result);return;}
       const endpoint="https://api.synoxcloud.xyz/ai-chat/unlimited-ai";
       const sid=sessionStorage.getItem("synoxcloud_session")||("vault-"+crypto.randomUUID());sessionStorage.setItem("synoxcloud_session",sid);
-      const context="Kamu BOT AI pengelola aplikasi YouTube Vault. Jawab bahasa Indonesia santai. Kamu tidak dapat mengubah data secara langsung; semua perubahan harus dijalankan oleh fitur lokal aplikasi. Jangan pernah mengklaim data berubah hanya dari percakapan. Ringkasan data aplikasi: "+JSON.stringify({accounts:state.accounts.map(a=>({username:a.username,contact:a.contact,category:a.category,duration:a.duration,aiNote:a.privateNote})),categories:state.categories})+". Pesan pengguna: "+q;
+      // Keep anonymous API prompts short: sending every account and private note can
+      // trigger SynoxCloud's anonymous long-text limit. Data commands are handled locally.
+      const context="Kamu BOT AI untuk aplikasi YouTube Vault. Jawab bahasa Indonesia yang ramah dan singkat. Jangan mengaku telah mengubah data aplikasi; operasi data dilakukan oleh aplikasi lokal. Untuk pertanyaan umum, jawab langsung. Pesan pengguna: "+q.slice(0,1200);
       const url=new URL(endpoint);url.searchParams.set("apikey","FREE");url.searchParams.set("prompt",context);url.searchParams.set("session",sid);
       const resp=await fetch(url.toString(),{method:"GET",headers:{"Accept":"application/json"}});
       if(!resp.ok)throw new Error("HTTP "+resp.status);const data=await resp.json();
       if(data.status===false||data.statusCode>=400)throw new Error(data.message||"API menolak permintaan");
       const answer=data.result?.answer||data.answer||data.message;
       if(typeof answer!=="string"||!answer.trim())throw new Error("Respons API tidak berisi result.answer");
-      addMsg("assistant",answer);
+      if(/batas untuk pengguna anonim|teks panjang|masuk untuk melanjutkan/i.test(answer)){
+        addMsg("assistant","SynoxCloud menolak pesan karena batas teks untuk pengguna anonim. Coba pesan singkat, atau gunakan API key/akun yang punya akses lebih tinggi. Perintah kelola akun sederhana tetap bisa diproses secara lokal.");
+      } else addMsg("assistant",answer);
     } catch(e){addMsg("assistant","Belum bisa menghubungi AI: "+e.message+". Data akun tetap aman.")} finally{send.disabled=false;}
   };
   document.getElementById("ai-send").onclick=run;document.getElementById("ai-input").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();run()}});
