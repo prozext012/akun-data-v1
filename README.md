@@ -37,3 +37,15 @@ Dimuat lewat CDN langsung di `index.html`, gak nambah proses build:
 ## Catatan soal data
 
 Data disimpan di `localStorage` HP/browser tempat app ini diakses — permanen selama gak di-uninstall/clear data, tapi khusus per-device. Pakai fitur **Backup Data** (JSON) di dalam app buat mindahin manual ke device lain.
+
+
+## Versi Retro + BOT AI
+
+- Tema Retro kertas/krem, jingga, teal, outline tebal, dan animasi interaksi.
+- Tombol **BOT AI** di sebelah pencarian membuka halaman chat terpisah.
+- Perintah lokal: cari akun, tambah akun dengan username, ubah kategori/durasi/catatan privat, hapus akun dengan konfirmasi, buat/hapus kategori, dan ringkasan jumlah akun.
+- Catatan privat AI tidak tampil di kartu akun. Durasi/limit tampil dengan warna kontras.
+- Halaman terakhir (Beranda/BOT AI) diingat di perangkat, tombol Back menutup halaman chat kembali ke aplikasi.
+- Untuk pertanyaan AI bebas, buka BOT AI → **API** lalu isi endpoint chat completions dan model yang sesuai dokumentasi penyedia. Integrasi menerima format balasan OpenAI-compatible (`choices[0].message.content`) dan beberapa format umum. Endpoint persis SynoxCloud tidak dimasukkan karena alamat endpoint belum tersedia/terverifikasi pada project.
+
+**Catatan privasi:** project ini menyimpan data di localStorage perangkat. Saat menghubungkan API eksternal, konteks akun yang dikirim mencakup username, kontak, kategori, durasi, dan catatan privat; jangan kirim data sensitif ke penyedia yang tidak dipercaya. Untuk deployment publik, gunakan backend/proxy untuk API key rahasia—jangan menaruh key pribadi di frontend.

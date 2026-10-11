@@ -7,7 +7,7 @@
 <meta name="description" content="Simpan data akun kamu dengan aman: username, kontak, password, dan foto." />
 
 <link rel="manifest" href="/manifest.json" />
-<meta name="theme-color" content="#09090b" />
+<meta name="theme-color" content="#F4ECD8" />
 <meta name="background-color" content="#09090b" />
 <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png" />
 <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16.png" />
@@ -75,6 +75,28 @@
   html.light .bg-zinc-100 { background-color: #18181b !important; }
   html.light .text-zinc-900 { color: #fafafa !important; }
   html.light .hover\:bg-white:hover { background-color: #27272a !important; }
+
+  /* Retro paper/ink theme based on the supplied reference */
+  :root{--retro-paper:#F4ECD8;--retro-card:#FFFBF2;--retro-ink:#2B2420;--retro-muted:#8A7A5C;--retro-line:#DCC9A0;--retro-orange:#D2552A;--retro-teal:#2F6E6A;}
+  body{background:var(--retro-paper)!important;color:var(--retro-ink)!important;font-family:Inter,system-ui,sans-serif!important;}
+  #root{background:var(--retro-paper);min-height:100%;}
+  #root .bg-zinc-950,#root .bg-zinc-900,#root .bg-zinc-800{background:var(--retro-card)!important;}
+  #root .border-zinc-800,#root .border-zinc-700{border-color:var(--retro-line)!important;}
+  #root .text-zinc-50,#root .text-zinc-100{color:var(--retro-ink)!important;}
+  #root .text-zinc-300,#root .text-zinc-400{color:#62533F!important;}
+  #root .text-zinc-500,#root .text-zinc-600{color:var(--retro-muted)!important;}
+  #root input,#root textarea{color:var(--retro-ink)!important;}
+  #root .bg-zinc-50{background:var(--retro-orange)!important;color:white!important;}
+  #root .text-zinc-900{color:white!important;}
+  #root .rounded-2xl,#root .rounded-xl{border-radius:12px!important;}
+  #root [data-account-card]{border:2px solid var(--retro-ink)!important;box-shadow:3px 3px 0 var(--retro-line);transition:transform .2s,box-shadow .2s;}
+  #root [data-account-card]:hover{transform:translateY(-3px);box-shadow:5px 6px 0 var(--retro-line);}
+  #root button:active{transform:scale(.96);}
+  .retro-ai{background:var(--retro-orange)!important;color:white!important;border:2px solid var(--retro-ink)!important;font-weight:800;box-shadow:2px 2px 0 var(--retro-ink);}
+  .ai-bubble{max-width:90%;padding:11px 13px;border:1.5px solid var(--retro-ink);border-radius:12px;background:var(--retro-card);color:var(--retro-ink);white-space:pre-wrap;overflow-wrap:anywhere;}
+  .ai-bubble.user{margin-left:auto;background:#E8A33D;}
+  .ai-action{background:#2F6E6A;color:white;border-radius:9px;padding:7px 10px;font-size:12px;font-weight:700;}
+  @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;}}
 </style>
 </head>
 <body class="bg-zinc-950 text-zinc-100">
@@ -342,6 +364,7 @@ function render() {
           <input id="search-input" value="${escapeHtml(state.query)}" placeholder="Cari username..."
             class="w-full rounded-xl bg-zinc-900 border border-zinc-800 pl-9 pr-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-red-500/50 transition-colors" />
         </div>
+        <button id="bot-ai-btn" class="retro-ai rounded-xl px-3 text-xs" aria-label="Buka BOT AI">✦ BOT AI</button>
         <button id="theme-btn" style="flex:1 1 0%" class="rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 hover:text-indigo-400 hover:border-indigo-500/50 transition-colors press" aria-label="Ganti tema">
           <i data-lucide="${state.theme === "light" ? "sun" : "moon"}" class="h-4 w-4"></i>
         </button>
@@ -368,6 +391,7 @@ function render() {
     renderGrid();
     renderHeaderCount();
   });
+  document.getElementById("bot-ai-btn").addEventListener("click", openAIPage);
   document.getElementById("backup-btn").addEventListener("click", openBackupSheet);
   document.getElementById("theme-btn").addEventListener("click", toggleTheme);
   document.getElementById("fab-add").addEventListener("click", () => openAccountModal(null));
@@ -547,7 +571,8 @@ function startChipDrag(name, el, startX, startY) {
 /* ================= Grid akun ================= */
 function getFiltered() {
   return state.accounts.filter((a) => {
-    const q = a.username.toLowerCase().includes(state.query.toLowerCase());
+    const query = state.query.toLowerCase();
+    const q = [a.username,a.contact,a.category,a.duration,a.privateNote].some(v => String(v || "").toLowerCase().includes(query));
     const c = state.activeCategory === "Semua" || a.category === state.activeCategory;
     return q && c;
   });
@@ -557,10 +582,10 @@ function accountCardHtml(a) {
   const photoHtml = a.photo
     ? `<img src="${a.photo}" alt="" class="w-full h-full object-cover" />`
     : `<div class="w-full h-full flex items-center justify-center"><i data-lucide="user" class="h-8 w-8 text-zinc-600"></i></div>`;
-  const descHtml = a.description
-    ? `<p class="mt-2.5 pt-2.5 border-t border-zinc-800 text-[11px] text-zinc-400 leading-relaxed line-clamp-3">${escapeHtml(a.description)}</p>`
+  const descHtml = a.duration
+    ? `<p class="mt-2.5 px-2.5 py-2 rounded-lg text-xs font-extrabold" style="background:#E8A33D;color:#2B2420;border:1.5px solid #2B2420">⏱ ${escapeHtml(a.duration)}</p>`
     : "";
-  const timeClass = a.description ? "mt-1" : "mt-2.5 pt-2.5 border-t border-zinc-800";
+  const timeClass = a.duration ? "mt-2" : "mt-2.5 pt-2.5 border-t border-zinc-800";
   return `
   <div class="rounded-2xl bg-zinc-900 border border-zinc-800 overflow-hidden card-in" data-account-card="${a.id}">
     <div class="relative w-full bg-zinc-800" style="aspect-ratio:${PHOTO_RATIO}">
@@ -729,8 +754,10 @@ function openAccountModal(existing) {
           <input id="f-password" value="${escapeHtml(existing?.password || "")}" placeholder="Password akun" class="w-full rounded-xl bg-zinc-800 border border-zinc-700 px-3 py-2.5 text-zinc-50 placeholder-zinc-600 focus:outline-none focus:border-red-500/60 transition-colors" />
         </div>
         <div class="pt-5 mt-2 border-t border-zinc-800">
-          <label class="text-xs text-zinc-500 mb-1 block">Deskripsi (opsional)</label>
-          <textarea id="f-description" rows="3" placeholder="Catatan tambahan soal akun ini..." class="w-full rounded-xl bg-zinc-800 border border-zinc-700 px-3 py-2.5 text-zinc-50 placeholder-zinc-600 focus:outline-none focus:border-red-500/60 resize-none transition-colors">${escapeHtml(existing?.description || "")}</textarea>
+          <label class="text-xs text-zinc-500 mb-1 block">Durasi / limit (opsional)</label>
+          <input id="f-duration" value="${escapeHtml(existing?.duration || "")}" placeholder="Contoh: Limit Website nunggu 55 M" class="w-full rounded-xl bg-zinc-800 border border-zinc-700 px-3 py-2.5 text-zinc-50 placeholder-zinc-600 focus:outline-none focus:border-red-500/60" />
+          <label class="text-xs text-zinc-500 mb-1 mt-3 block">Catatan privat untuk BOT AI</label>
+          <textarea id="f-private-note" rows="3" placeholder="Konteks akun untuk AI; tidak tampil di kartu utama..." class="w-full rounded-xl bg-zinc-800 border border-zinc-700 px-3 py-2.5 text-zinc-50 placeholder-zinc-600 focus:outline-none focus:border-red-500/60 resize-none transition-colors">${escapeHtml(existing?.privateNote || existing?.description || "")}</textarea>
         </div>
         <div class="pt-1">
           <label class="text-xs text-zinc-500 mb-1 block">Kategori</label>
@@ -874,7 +901,9 @@ function handleSaveAccount(existing) {
     username,
     contact: document.getElementById("f-contact").value.trim(),
     password: document.getElementById("f-password").value,
-    description: document.getElementById("f-description").value.trim(),
+    description: "",
+    privateNote: document.getElementById("f-private-note").value.trim(),
+    duration: document.getElementById("f-duration").value.trim(),
     category: state.selectedCategory,
     photo: state.photoDataUrl,
     createdAt: existing?.createdAt || now,
@@ -1000,6 +1029,78 @@ function handleImportFile(e) {
   e.target.value = "";
 }
 
+/* ================= BOT AI: chat + safe data actions ================= */
+const AI_SESSION_KEY = "vault-ai-session-v1";
+function openAIPage(push=true) {
+  if (document.getElementById("ai-page")) return;
+  if (push) { try{history.pushState({page:"ai"},"","#bot-ai");}catch{} }
+  try{localStorage.setItem("vault-last-page","ai");}catch{}
+  const page=document.createElement("section"); page.id="ai-page";
+  page.className="fixed inset-0 z-[80] flex flex-col fade-in";
+  page.style.cssText="background:#F4ECD8;color:#2B2420;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)";
+  page.innerHTML=`<header class="flex items-center gap-3 p-4 border-b" style="border-color:#DCC9A0"><button id="ai-back" class="rounded-lg px-3 py-2" style="border:2px solid #2B2420">←</button><div class="flex-1"><h2 style="font-weight:900;font-size:18px">✦ BOT AI</h2><p style="font-size:11px;color:#8A7A5C">Asisten pengelola Data Akun</p></div><button id="ai-api" class="text-xs font-bold mr-2">API</button><button id="ai-clear" class="text-xs font-bold">Reset chat</button></header><div id="ai-messages" class="flex-1 overflow-y-auto p-4 space-y-3"></div><div class="p-3 border-t" style="border-color:#DCC9A0"><div class="flex gap-2"><textarea id="ai-input" rows="2" class="flex-1 rounded-xl p-3 text-sm" style="background:#FFFBF2;border:2px solid #2B2420;resize:none;color:#2B2420" placeholder="Contoh: tambahkan akun @contoh kategori YouTube..."></textarea><button id="ai-send" class="retro-ai rounded-xl px-4">Kirim</button></div><p class="text-[10px] mt-2" style="color:#8A7A5C">Aksi hapus selalu minta konfirmasi. Data tersimpan di perangkat ini.</p></div>`;
+  document.body.appendChild(page);
+  const messages=document.getElementById("ai-messages");
+  let historyItems=[]; try{historyItems=JSON.parse(sessionStorage.getItem(AI_SESSION_KEY)||"[]")}catch{}
+  const addMsg=(role,text)=>{const el=document.createElement("div");el.className="ai-bubble "+(role==="user"?"user":"");el.textContent=text;messages.appendChild(el);messages.scrollTop=messages.scrollHeight;historyItems.push({role,content:text});try{sessionStorage.setItem(AI_SESSION_KEY,JSON.stringify(historyItems.slice(-40)))}catch{}};
+  if(historyItems.length){historyItems.forEach(m=>{const el=document.createElement("div");el.className="ai-bubble "+(m.role==="user"?"user":"");el.textContent=m.content;messages.appendChild(el)})}else addMsg("assistant","Halo! Gue bisa bantu cari, tambah, edit, hapus akun, dan kelola kategori. Coba: ‘cari akun TikTok’ atau ‘buat kategori Streaming’. Untuk tambah akun, sebut username dan kategori.");
+  document.getElementById("ai-back").onclick=()=>{try{localStorage.setItem("vault-last-page","home")}catch{} page.remove();if(location.hash==="#bot-ai")history.back();else render()};
+  document.getElementById("ai-api").onclick=()=>{const endpoint="https://api.synoxcloud.xyz/ai-chat/unlimited-ai";localStorage.setItem("synoxcloud_endpoint",endpoint);addMsg("assistant","Endpoint SynoxCloud Unlimited AI sudah disetel. Request memakai GET dengan apikey=FREE, prompt, dan session.");};
+  document.getElementById("ai-clear").onclick=()=>{historyItems=[];try{sessionStorage.removeItem(AI_SESSION_KEY)}catch{}messages.innerHTML="";addMsg("assistant","Chat direset. Data akun tidak dihapus.")};
+  const run=async()=>{const input=document.getElementById("ai-input"),send=document.getElementById("ai-send"),q=input.value.trim();if(!q)return;input.value="";addMsg("user",q);send.disabled=true;
+    try { const result=await handleAICommand(q,addMsg); if(result!==null){addMsg("assistant",result);return;}
+      const endpoint="https://api.synoxcloud.xyz/ai-chat/unlimited-ai";
+      const sid=sessionStorage.getItem("synoxcloud_session")||("vault-"+crypto.randomUUID());sessionStorage.setItem("synoxcloud_session",sid);
+      const context="Kamu BOT AI pengelola aplikasi YouTube Vault. Jawab bahasa Indonesia santai. Kamu tidak dapat mengubah data secara langsung; semua perubahan harus dijalankan oleh fitur lokal aplikasi. Jangan pernah mengklaim data berubah hanya dari percakapan. Ringkasan data aplikasi: "+JSON.stringify({accounts:state.accounts.map(a=>({username:a.username,contact:a.contact,category:a.category,duration:a.duration,aiNote:a.privateNote})),categories:state.categories})+". Pesan pengguna: "+q;
+      const url=new URL(endpoint);url.searchParams.set("apikey","FREE");url.searchParams.set("prompt",context);url.searchParams.set("session",sid);
+      const resp=await fetch(url.toString(),{method:"GET",headers:{"Accept":"application/json"}});
+      if(!resp.ok)throw new Error("HTTP "+resp.status);const data=await resp.json();
+      if(data.status===false||data.statusCode>=400)throw new Error(data.message||"API menolak permintaan");
+      const answer=data.result?.answer||data.answer||data.message;
+      if(typeof answer!=="string"||!answer.trim())throw new Error("Respons API tidak berisi result.answer");
+      addMsg("assistant",answer);
+    } catch(e){addMsg("assistant","Belum bisa menghubungi AI: "+e.message+". Data akun tetap aman.")} finally{send.disabled=false;}
+  };
+  document.getElementById("ai-send").onclick=run;document.getElementById("ai-input").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();run()}});
+}
+async function handleAICommand(raw,addMsg){
+  const q=raw.trim(), low=q.toLowerCase();
+  const findAccount=()=>state.accounts.find(a=>low.includes(a.username.toLowerCase())||low.includes("@"+a.username.toLowerCase()));
+  if(/^(cari|search|temukan|tampilkan|daftar|list)\b/.test(low)){
+    const term=q.replace(/^(cari|search|temukan|tampilkan|daftar|list)\s+(akun\s+)?/i,"").trim();const found=state.accounts.filter(a=>[a.username,a.contact,a.category,a.duration,a.privateNote].some(v=>String(v||"").toLowerCase().includes(term.toLowerCase())));
+    return found.length?`Ketemu ${found.length} akun:\n`+found.map(a=>`• @${a.username} — ${a.category}${a.duration?" — "+a.duration:""}`).join("\n"):"Belum ada akun yang cocok dengan pencarian itu.";
+  }
+  if(/^(berapa|jumlah|total|ada berapa)/.test(low))return `Total ${state.accounts.length} akun dan ${state.categories.length} kategori.\n`+state.categories.map(c=>`${c}: ${state.accounts.filter(a=>a.category===c).length}`).join("\n");
+  if(/^(buat kategori|tambah kategori|kategori baru|create category)/.test(low)){
+    const name=q.replace(/^(buat kategori|tambah kategori|kategori baru|create category)\s*/i,"").trim();if(!name)return "Sebutkan nama kategori yang mau dibuat.";
+    if(state.categories.some(c=>c.toLowerCase()===name.toLowerCase()))return `Kategori “${name}” sudah ada.`;
+    persistCategories([...state.categories,name]);persistFilterOrder([...state.filterOrder,name]);renderFilters();return `Kategori “${name}” berhasil dibuat.`;
+  }
+  if(/^(hapus kategori|delete category)/.test(low)){
+    const name=q.replace(/^(hapus kategori|delete category)\s*/i,"").trim();if(!state.categories.includes(name))return `Kategori “${name}” tidak ditemukan.`;
+    if(!confirm(`Hapus kategori “${name}”? Akun di kategori ini akan dipindahkan ke “Lainnya”.`))return "Penghapusan kategori dibatalkan.";
+    const cats=state.categories.filter(c=>c!==name);if(!cats.includes("Lainnya"))cats.push("Lainnya");persistCategories(cats);persistAccounts(state.accounts.map(a=>a.category===name?{...a,category:"Lainnya"}:a));persistFilterOrder(reconcileOrder(state.filterOrder,cats));renderFilters();renderGrid();renderHeaderCount();return `Kategori “${name}” dihapus; akun terkait dipindah ke Lainnya.`;
+  }
+  if(/^(hapus|delete|buang)\b/.test(low)){
+    const a=findAccount();if(!a)return "Akun yang mau dihapus belum jelas. Sebut username persisnya, misalnya: hapus akun @contoh.";
+    if(!confirm(`Yakin hapus akun @${a.username}?`))return "Penghapusan dibatalkan.";persistAccounts(state.accounts.filter(x=>x.id!==a.id));renderGrid();renderHeaderCount();return `Akun @${a.username} berhasil dihapus.`;
+  }
+  if(/^(ubah|edit|ganti)\b/.test(low)){
+    const a=findAccount();if(!a)return "Akun yang mau diedit belum jelas. Sebut username yang tepat.";
+    const dur=q.match(/(?:durasi|limit)\s+(?:jadi\s+)?(.+)/i);if(dur){persistAccounts(state.accounts.map(x=>x.id===a.id?{...x,duration:dur[1].trim()}:x));renderGrid();return `Durasi akun @${a.username} diperbarui menjadi: ${dur[1].trim()}`;}
+    const cat=q.match(/kategori\s+(?:jadi\s+)?(.+)/i);if(cat&&state.categories.includes(cat[1].trim())){persistAccounts(state.accounts.map(x=>x.id===a.id?{...x,category:cat[1].trim()}:x));renderFilters();renderGrid();return `Kategori @${a.username} diubah menjadi ${cat[1].trim()}.`}
+    const note=q.match(/catatan\s+(?:jadi\s+)?(.+)/i);if(note){persistAccounts(state.accounts.map(x=>x.id===a.id?{...x,privateNote:note[1].trim()}:x));return `Catatan privat @${a.username} berhasil diperbarui.`}
+    return `Mau ubah bagian mana dari @${a.username}? Sebut “kategori jadi …”, “durasi jadi …”, atau “catatan jadi …”.`;
+  }
+  if(/^(tambah akun|buat akun|add account)/.test(low)){
+    const username=(q.match(/@([\w.-]+)/)||[])[1];if(!username)return "Sebut username, misalnya: tambah akun @namaku kategori YouTube.";
+    if(state.accounts.some(a=>a.username.toLowerCase()===username.toLowerCase()))return `Akun @${username} sudah ada.`;
+    const catMatch=q.match(/kategori\s+(.+?)(?:\s+durasi\s+|$)/i);const category=catMatch?.[1]?.trim()||"Lainnya";if(!state.categories.includes(category)){persistCategories([...state.categories,category]);persistFilterOrder([...state.filterOrder,category]);}
+    const dur=q.match(/durasi\s+(.+)/i);persistAccounts([{id:uid(),username,contact:"",password:"",description:"",privateNote:"",duration:dur?.[1]?.trim()||"",category,photo:"",createdAt:Date.now(),updatedAt:Date.now()},...state.accounts]);renderFilters();renderGrid();renderHeaderCount();return `Akun @${username} ditambahkan ke kategori ${category}${dur?" dengan durasi "+dur[1].trim():""}. Detail kontak/password bisa dilengkapi lewat form Edit.`;
+  }
+  return null;
+}
+
 /* ================= Init ================= */
 function init() {
   let savedTheme = "dark";
@@ -1008,6 +1109,11 @@ function init() {
 
   loadAll();
   render();
+  try { if (localStorage.getItem("vault-last-page") === "ai") openAIPage(false); } catch {}
+  window.addEventListener("popstate", () => {
+    const ai = document.getElementById("ai-page");
+    if (ai) { ai.remove(); try{localStorage.setItem("vault-last-page","home");}catch{} render(); }
+  });
 
   if (!isStandalone() && !localStorage.getItem(INSTALL_DISMISS_KEY)) {
     if (isIOS()) {
