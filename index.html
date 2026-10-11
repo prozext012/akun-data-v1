@@ -7,7 +7,7 @@
 <meta name="description" content="Simpan data akun kamu dengan aman: username, kontak, password, dan foto." />
 
 <link rel="manifest" href="/manifest.json" />
-<meta name="theme-color" content="#F4ECD8" />
+<meta name="theme-color" content="#09090b" />
 <meta name="background-color" content="#09090b" />
 <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png" />
 <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16.png" />
@@ -76,26 +76,11 @@
   html.light .text-zinc-900 { color: #fafafa !important; }
   html.light .hover\:bg-white:hover { background-color: #27272a !important; }
 
-  /* Retro paper/ink theme based on the supplied reference */
-  :root{--retro-paper:#F4ECD8;--retro-card:#FFFBF2;--retro-ink:#2B2420;--retro-muted:#8A7A5C;--retro-line:#DCC9A0;--retro-orange:#D2552A;--retro-teal:#2F6E6A;}
-  body{background:var(--retro-paper)!important;color:var(--retro-ink)!important;font-family:Inter,system-ui,sans-serif!important;}
-  #root{background:var(--retro-paper);min-height:100%;}
-  #root .bg-zinc-950,#root .bg-zinc-900,#root .bg-zinc-800{background:var(--retro-card)!important;}
-  #root .border-zinc-800,#root .border-zinc-700{border-color:var(--retro-line)!important;}
-  #root .text-zinc-50,#root .text-zinc-100{color:var(--retro-ink)!important;}
-  #root .text-zinc-300,#root .text-zinc-400{color:#62533F!important;}
-  #root .text-zinc-500,#root .text-zinc-600{color:var(--retro-muted)!important;}
-  #root input,#root textarea{color:var(--retro-ink)!important;}
-  #root .bg-zinc-50{background:var(--retro-orange)!important;color:white!important;}
-  #root .text-zinc-900{color:white!important;}
-  #root .rounded-2xl,#root .rounded-xl{border-radius:12px!important;}
-  #root [data-account-card]{border:2px solid var(--retro-ink)!important;box-shadow:3px 3px 0 var(--retro-line);transition:transform .2s,box-shadow .2s;}
-  #root [data-account-card]:hover{transform:translateY(-3px);box-shadow:5px 6px 0 var(--retro-line);}
-  #root button:active{transform:scale(.96);}
-  .retro-ai{background:var(--retro-orange)!important;color:white!important;border:2px solid var(--retro-ink)!important;font-weight:800;box-shadow:2px 2px 0 var(--retro-ink);}
-  .ai-bubble{max-width:90%;padding:11px 13px;border:1.5px solid var(--retro-ink);border-radius:12px;background:var(--retro-card);color:var(--retro-ink);white-space:pre-wrap;overflow-wrap:anywhere;}
-  .ai-bubble.user{margin-left:auto;background:#E8A33D;}
-  .ai-action{background:#2F6E6A;color:white;border-radius:9px;padding:7px 10px;font-size:12px;font-weight:700;}
+  /* AI chat support, matching the original dark UI */
+  .ai-bubble{max-width:90%;padding:11px 13px;border:1px solid #3f3f46;border-radius:14px;background:#18181b;color:#f4f4f5;white-space:pre-wrap;overflow-wrap:anywhere;}
+  .ai-bubble.user{margin-left:auto;background:#4f46e5;color:#fff;border-color:#6366f1;}
+  .ai-action{background:#4f46e5;color:white;border-radius:9px;padding:7px 10px;font-size:12px;font-weight:700;}
+  .retro-ai{background:#4f46e5!important;color:white!important;border:1px solid #6366f1!important;font-weight:700;}
   @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;}}
 </style>
 </head>
